@@ -320,8 +320,8 @@ VITE_API_URL=http://localhost:5000/api
 
 ### Step 1: Clone the Repository
 ```bash
-git clone https://github.com/your-username/campusconnect-mern.git
-cd campusconnect-mern
+git clone https://github.com/jovilin225501/caston.git
+cd caston
 ```
 
 ### Step 2: Install All Dependencies
