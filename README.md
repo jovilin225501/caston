@@ -375,36 +375,43 @@ npm test
 
 ---
 
-## 🚀 Deployment Guide (Render & MongoDB Atlas)
+## 🚀 Deployment Guide (Manual Render Web Service)
 
-The project includes a unified `render.yaml` Blueprint file for turnkey deployment on [Render](https://render.com/).
+Deploying as a manual **Web Service** on [Render](https://render.com/) is straightforward, requires only the free tier, and provides a single unified URL for both the React frontend and Express API.
 
-### Architecture on Render
-The project provides a unified **Web Service Blueprint** (`render.yaml`) that builds both client and server and deploys the complete MERN application on a single Render Web Service:
-- **Service Type:** Web Service (`campusconnect`)
+### Render Web Service Settings:
+- **Service Type:** Web Service
+- **Name:** `campusconnect` (or any custom name)
+- **Repository:** `https://github.com/jovilin225501/caston`
+- **Branch:** `main`
+- **Root Directory:** *(leave blank / default root)*
 - **Runtime:** `Node`
-- **Build Command:** `npm install && npm run build --prefix client && npm install --prefix server`
+- **Build Command:** `npm run build`
 - **Start Command:** `npm start`
-- **Health Check Path:** `/api/health`
-- **Database:** MongoDB Atlas M0 Cluster
+- **Plan:** Free
 
-### Advantages of the Unified Web Service Blueprint:
-1. **Single Service:** Fits comfortably on Render's free tier without multi-service plan limits.
-2. **Zero CORS Friction:** Client SPA assets and Express API endpoints share the exact same domain.
-3. **Turnkey Deployment:** One-click deployment with a single URL for both the web app and API.
+### Required Environment Variables in Render Dashboard:
+Under **Environment Variables** in your Web Service settings, add:
+| Key | Value | Description |
+| :--- | :--- | :--- |
+| `NODE_ENV` | `production` | Enables production mode and static React asset serving |
+| `MONGODB_URI` | `mongodb+srv://caston:JOVILIN123@jovilin0.noawqe2.mongodb.net/campusconnect?retryWrites=true&w=majority` | Your MongoDB Atlas connection string |
+| `JWT_SECRET` | `campusconnect_super_secret_jwt_key_2026_production` | Cryptographic key for JWT tokens |
+| `ADMIN_PASSCODE` | `CampusAdmin@2026` | Authorization code for administrator accounts |
 
-### Step-by-Step Deployment
-1. **Create a MongoDB Atlas Cluster:**
-   - Go to [MongoDB Atlas](https://www.mongodb.com/cloud/atlas), create a free M0 cluster.
-   - In "Database Access", create a database user and password.
-   - In "Network Access", allow IP `0.0.0.0/0` (Allow access from anywhere).
-   - Copy the connection URI: `mongodb+srv://<username>:<password>@cluster0.mongodb.net/campusconnect?retryWrites=true&w=majority`.
-
-2. **Deploy on Render:**
-   - Log in to your Render dashboard and link your GitHub repository.
-   - Select **New Blueprint** and choose the repository.
-   - When prompted for `MONGODB_URI`, paste your MongoDB Atlas connection string.
-   - Click **Apply Blueprint**. Render will build and deploy both services automatically!
+### Step-by-Step Manual Deployment on Render:
+1. Go to your [Render Dashboard](https://dashboard.render.com/).
+2. Click **New +** (top right) ➔ Select **Web Service**.
+3. Choose **Build and deploy from a Git repository**, click **Next**, and select your repository **`jovilin225501/caston`**.
+4. Configure the settings:
+   - **Name:** `campusconnect`
+   - **Build Command:** `npm run build`
+   - **Start Command:** `npm start`
+5. Scroll down to **Environment Variables** and add `NODE_ENV`, `MONGODB_URI`, `JWT_SECRET`, and `ADMIN_PASSCODE`.
+6. Click **Deploy Web Service** (or **Create Web Service**).
+7. Render will build the React bundle, launch the Node.js Express server, and connect to MongoDB Atlas!
+   - **Live App URL:** `https://campusconnect.onrender.com`
+   - **Health Check URL:** `https://campusconnect.onrender.com/api/health`
 
 ---
 
