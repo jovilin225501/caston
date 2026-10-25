@@ -380,18 +380,18 @@ npm test
 The project includes a unified `render.yaml` Blueprint file for turnkey deployment on [Render](https://render.com/).
 
 ### Architecture on Render
-1. **Frontend:** Render Static Site (`campusconnect-client`)
-   - Root Directory: `client`
-   - Build Command: `npm install && npm run build`
-   - Publish Directory: `dist`
-   - SPA Rewrite: `/*` -> `/index.html`
-2. **Backend:** Render Web Service (`campusconnect-api`)
-   - Root Directory: `server`
-   - Runtime: `Node`
-   - Build Command: `npm install`
-   - Start Command: `node src/server.js`
-   - Health Check Path: `/api/health`
-3. **Database:** MongoDB Atlas M0 Free Cluster
+The project provides a unified **Web Service Blueprint** (`render.yaml`) that builds both client and server and deploys the complete MERN application on a single Render Web Service:
+- **Service Type:** Web Service (`campusconnect`)
+- **Runtime:** `Node`
+- **Build Command:** `npm install && npm run build --prefix client && npm install --prefix server`
+- **Start Command:** `npm start`
+- **Health Check Path:** `/api/health`
+- **Database:** MongoDB Atlas M0 Cluster
+
+### Advantages of the Unified Web Service Blueprint:
+1. **Single Service:** Fits comfortably on Render's free tier without multi-service plan limits.
+2. **Zero CORS Friction:** Client SPA assets and Express API endpoints share the exact same domain.
+3. **Turnkey Deployment:** One-click deployment with a single URL for both the web app and API.
 
 ### Step-by-Step Deployment
 1. **Create a MongoDB Atlas Cluster:**

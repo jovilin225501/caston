@@ -2,8 +2,14 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import fs from 'fs';
 import { apiLimiter } from './middleware/rateLimitMiddleware.js';
 import { notFound, errorHandler } from './middleware/errorMiddleware.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 import authRoutes from './routes/authRoutes.js';
 import eventRoutes from './routes/eventRoutes.js';
@@ -14,8 +20,22 @@ import healthRoutes from './routes/healthRoutes.js';
 
 const app = express();
 
-// Security HTTP headers
-app.use(helmet());
+// Security HTTP headers with permissive CSP for fonts and Unsplash event images
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'"],
+        styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+        fontSrc: ["'self'", 'https://fonts.gstatic.com', 'data:'],
+        imgSrc: ["'self'", 'data:', 'https://images.unsplash.com', 'https://*.unsplash.com', 'https://*.render.com'],
+        connectSrc: ["'self'", 'http://localhost:*', 'https://*.onrender.com'],
+      },
+    },
+    crossOriginEmbedderPolicy: false,
+  })
+);
 
 // CORS Configuration
 const allowedOrigins = process.env.CLIENT_URL
@@ -64,14 +84,33 @@ app.use('/api/registrations', registrationRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/admin', adminRoutes);
 
-// Root Welcome Endpoint
-app.get('/', (req, res) => {
-  res.json({
-    message: 'Welcome to CampusConnect API - Student Campus Activity & Event Management Platform',
-    documentation: '/api/health',
-    status: 'Operational',
+// Serve frontend static assets in production if built
+const candidateDistPaths = [
+  path.resolve(__dirname, '../../client/dist'),
+  path.resolve(process.cwd(), 'client/dist'),
+  path.resolve(process.cwd(), '../client/dist'),
+];
+
+const staticPath = candidateDistPaths.find((p) => fs.existsSync(p));
+
+if (staticPath) {
+  app.use(express.static(staticPath));
+  app.get('*', (req, res, next) => {
+    if (req.originalUrl.startsWith('/api')) {
+      return next();
+    }
+    res.sendFile(path.join(staticPath, 'index.html'));
   });
-});
+} else {
+  // Root Welcome Endpoint when frontend bundle is not local
+  app.get('/', (req, res) => {
+    res.json({
+      message: 'Welcome to CampusConnect API - Student Campus Activity & Event Management Platform',
+      documentation: '/api/health',
+      status: 'Operational',
+    });
+  });
+}
 
 // Error handling middleware
 app.use(notFound);
